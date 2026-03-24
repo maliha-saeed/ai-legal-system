@@ -1,0 +1,210 @@
+{% extends "base.html" %}
+{% block title %}Case {{ case.id }} — {{ case.client_name }}{% endblock %}
+
+{% block content %}
+
+<!-- Header -->
+<div style="display:flex;align-items:flex-start;gap:1rem;margin-bottom:1.75rem;flex-wrap:wrap">
+  <div style="flex:1">
+    <div style="font-size:0.78rem;color:var(--muted);font-family:'DM Mono',monospace;margin-bottom:0.3rem">
+      CASE-{{ '%04d' % case.id }} · Submitted {{ case.created_at[:10] }}
+    </div>
+    <h1 style="font-family:'DM Serif Display',serif;font-size:1.9rem;color:var(--navy)">
+      {{ case.client_name }}
+    </h1>
+  </div>
+  <div style="display:flex;gap:0.6rem;flex-wrap:wrap;margin-top:0.5rem">
+    <form method="POST" action="{{ url_for('reanalyse_case', case_id=case.id) }}" style="display:inline">
+      <button type="submit" class="btn btn-outline btn-sm">🔄 Re-analyse</button>
+    </form>
+    <a href="{{ url_for('intake') }}" class="btn btn-gold btn-sm">+ New Case</a>
+    <a href="{{ url_for('index') }}" class="btn btn-outline btn-sm">← Dashboard</a>
+  </div>
+</div>
+
+<div class="disclaimer">
+  ⚠️ AI analysis results are for information only. They do not constitute legal advice.
+</div>
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:1.25rem">
+
+  <!-- Left Column -->
+  <div>
+
+    <!-- Client Info -->
+    <div class="card">
+      <div class="card-header">👤 Client Information</div>
+      <div class="detail-grid">
+        <div class="detail-item">
+          <div class="di-label">Full Name</div>
+          <div class="di-value">{{ case.client_name }}</div>
+        </div>
+        <div class="detail-item">
+          <div class="di-label">Date of Birth</div>
+          <div class="di-value">{{ case.client_dob or '—' }}</div>
+        </div>
+        <div class="detail-item">
+          <div class="di-label">Email</div>
+          <div class="di-value">{{ case.client_email or '—' }}</div>
+        </div>
+        <div class="detail-item">
+          <div class="di-label">Phone</div>
+          <div class="di-value">{{ case.client_phone or '—' }}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Incident Info -->
+    <div class="card">
+      <div class="card-header">📅 Incident Details</div>
+      <div class="detail-grid" style="margin-bottom:1rem">
+        <div class="detail-item">
+          <div class="di-label">Incident Date</div>
+          <div class="di-value">{{ case.incident_date }}</div>
+        </div>
+        <div class="detail-item">
+          <div class="di-label">Incident Type</div>
+          <div class="di-value">{{ case.incident_type }}</div>
+        </div>
+        <div class="detail-item" style="grid-column:1/-1">
+          <div class="di-label">Location</div>
+          <div class="di-value">{{ case.incident_location or '—' }}</div>
+        </div>
+      </div>
+      <div>
+        <div class="di-label" style="font-size:0.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:.4rem">Description</div>
+        <p style="font-size:0.9rem;line-height:1.65;color:var(--text)">{{ case.incident_description }}</p>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Right Column -->
+  <div>
+
+    <!-- Classification Result -->
+    <div class="card">
+      <div class="card-header">🤖 Claim Classification</div>
+      <div style="margin-bottom:0.75rem">
+        <div class="di-label" style="font-size:0.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:.35rem">Identified Category</div>
+        {% if case.claim_type == 'Personal Injury' %}
+          <span class="badge badge-pi" style="font-size:0.9rem;padding:.35rem .9rem">Personal Injury</span>
+        {% elif case.claim_type == 'Clinical Negligence' %}
+          <span class="badge badge-cn" style="font-size:0.9rem;padding:.35rem .9rem">Clinical Negligence</span>
+        {% elif case.claim_type == 'Housing Disrepair' %}
+          <span class="badge badge-hd" style="font-size:0.9rem;padding:.35rem .9rem">Housing Disrepair</span>
+        {% else %}
+          <span class="badge" style="font-size:0.9rem;padding:.35rem .9rem">{{ case.claim_type or 'Unknown' }}</span>
+        {% endif %}
+      </div>
+
+      <div style="margin-bottom:0.75rem">
+        <div class="di-label" style="font-size:0.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:.25rem">
+          Confidence — {{ (case.claim_confidence * 100) | int if case.claim_confidence else 0 }}%
+        </div>
+        <div class="conf-bar">
+          <div class="conf-fill" style="width:{{ (case.claim_confidence * 100) | int if case.claim_confidence else 0 }}%"></div>
+        </div>
+      </div>
+
+      <div>
+        <div class="di-label" style="font-size:0.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:.25rem">Matched Keywords</div>
+        <div style="font-size:0.85rem;color:var(--muted);font-family:'DM Mono',monospace">
+          {{ case.claim_keywords or 'None' }}
+        </div>
+      </div>
+    </div>
+
+    <!-- Viability Result -->
+    <div class="card">
+      <div class="card-header">⚖️ Initial Viability Screening</div>
+      <div style="margin-bottom:0.75rem">
+        {% if case.viability_status == 'Potentially Viable' %}
+          <span class="badge badge-viable" style="font-size:0.9rem;padding:.35rem .9rem">✓ Potentially Viable</span>
+        {% elif case.viability_status == 'More Info Required' %}
+          <span class="badge badge-more" style="font-size:0.9rem;padding:.35rem .9rem">⚠ More Info Required</span>
+        {% elif case.viability_status == 'Low Viability' %}
+          <span class="badge badge-low" style="font-size:0.9rem;padding:.35rem .9rem">✗ Low Viability</span>
+        {% endif %}
+      </div>
+      <div class="viability-box">{{ case.viability_explanation or '—' }}</div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Documents Section -->
+<div class="card" style="margin-top:0">
+  <div class="card-header">
+    📎 Uploaded Documents
+    <span style="font-size:0.8rem;font-weight:400;color:var(--muted)">— .txt files will be processed for entity extraction</span>
+  </div>
+
+  <!-- Upload Form -->
+  <form method="POST" action="{{ url_for('upload_document', case_id=case.id) }}" enctype="multipart/form-data" style="margin-bottom:1.25rem">
+    <div style="display:flex;gap:0.75rem;align-items:center;flex-wrap:wrap">
+      <input type="file" name="document" accept=".txt,.pdf,.doc,.docx"
+             style="font-size:0.88rem;flex:1;min-width:200px"
+             class="form-control" required>
+      <button type="submit" class="btn btn-primary btn-sm">Upload Document</button>
+    </div>
+    <p style="font-size:0.78rem;color:var(--muted);margin-top:0.4rem">Supported: .txt, .pdf, .doc, .docx (max 5MB). Text extraction runs automatically on .txt files.</p>
+  </form>
+
+  {% if documents %}
+    {% for doc in documents %}
+    <div style="border:1px solid var(--border);border-radius:var(--radius);padding:1rem;margin-bottom:0.75rem;background:#fafaf8">
+      <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.75rem">
+        <span style="font-size:1.2rem">📄</span>
+        <strong style="font-size:0.92rem">{{ doc.filename }}</strong>
+        <span style="font-size:0.78rem;color:var(--muted);margin-left:auto">{{ doc.uploaded_at[:16] }}</span>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem 1.25rem">
+        <div>
+          <div class="di-label" style="font-size:0.72rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:.2rem">Extracted Names</div>
+          <div style="font-size:0.85rem;font-family:'DM Mono',monospace">{{ doc.extracted_names or '—' }}</div>
+        </div>
+        <div>
+          <div class="di-label" style="font-size:0.72rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:.2rem">Extracted Dates</div>
+          <div style="font-size:0.85rem;font-family:'DM Mono',monospace">{{ doc.extracted_dates or '—' }}</div>
+        </div>
+        <div>
+          <div class="di-label" style="font-size:0.72rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:.2rem">Locations</div>
+          <div style="font-size:0.85rem;font-family:'DM Mono',monospace">{{ doc.extracted_locations or '—' }}</div>
+        </div>
+        <div>
+          <div class="di-label" style="font-size:0.72rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:.2rem">Keywords Found</div>
+          <div style="font-size:0.85rem;font-family:'DM Mono',monospace">{{ doc.extracted_keywords or '—' }}</div>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  {% else %}
+    <p style="color:var(--muted);font-size:0.88rem;text-align:center;padding:1.5rem 0">No documents uploaded yet.</p>
+  {% endif %}
+</div>
+
+<!-- Template Generator -->
+{% if templates %}
+<div class="card">
+  <div class="card-header">📝 Document Templates</div>
+  <p style="font-size:0.88rem;color:var(--muted);margin-bottom:1rem">
+    Generate a draft document pre-filled with this case's data.
+    All documents must be reviewed and edited by a solicitor before use.
+  </p>
+  <div style="display:flex;flex-direction:column;gap:0.6rem">
+    {% for tmpl in templates %}
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:0.75rem 1rem;border:1px solid var(--border);border-radius:var(--radius);background:#fafaf8">
+      <div>
+        <strong style="font-size:0.9rem">{{ tmpl.name }}</strong>
+        <div style="font-size:0.78rem;color:var(--muted)">{{ tmpl.claim_type }}</div>
+      </div>
+      <a href="{{ url_for('generate_document', case_id=case.id, template_id=tmpl.id) }}"
+         class="btn btn-gold btn-sm">Generate Draft →</a>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+{% endblock %}

@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% block title %}Generated Document — {{ template.name }}{% endblock %}
+
+{% block content %}
+
+<div style="display:flex;align-items:center;gap:1rem;margin-bottom:1.5rem;flex-wrap:wrap">
+  <div style="flex:1">
+    <div style="font-size:0.78rem;color:var(--muted);font-family:'DM Mono',monospace;margin-bottom:0.3rem">
+      CASE-{{ '%04d' % case.id }} · {{ case.client_name }}
+    </div>
+    <h1 style="font-family:'DM Serif Display',serif;font-size:1.7rem;color:var(--navy)">
+      Generated Draft Document
+    </h1>
+  </div>
+  <div style="display:flex;gap:0.6rem">
+    <button onclick="window.print()" class="btn btn-gold btn-sm">🖨 Print / Save PDF</button>
+    <a href="{{ url_for('case_detail', case_id=case.id) }}" class="btn btn-outline btn-sm">← Back to Case</a>
+  </div>
+</div>
+
+<div class="disclaimer">
+  ⚠️ <strong>IMPORTANT:</strong> This document is a <strong>draft template only</strong>.
+</div>
+
+<div class="card">
+  <div class="card-header">
+    📄 {{ template.name }}
+    <span class="badge badge-pi" style="margin-left:0.5rem;font-size:0.72rem">{{ template.claim_type }}</span>
+  </div>
+
+  <div style="background:#fafaf8;border:1px solid var(--border);border-radius:var(--radius);padding:2rem;font-family:'DM Mono',monospace;font-size:0.88rem;line-height:1.8;white-space:pre-wrap;color:var(--text)">{{ content }}</div>
+
+  <div style="margin-top:1.25rem;display:flex;gap:0.75rem;flex-wrap:wrap">
+    <button onclick="copyDocument()" class="btn btn-primary btn-sm">📋 Copy Text</button>
+    <button onclick="window.print()" class="btn btn-outline btn-sm">🖨 Print</button>
+    <a href="{{ url_for('case_detail', case_id=case.id) }}" class="btn btn-outline btn-sm">← Back</a>
+  </div>
+</div>
+
+<script>
+function copyDocument() {
+  const text = document.querySelector('div[style*="pre-wrap"]').innerText;
+  navigator.clipboard.writeText(text).then(() => {
+    alert('Document text copied to clipboard.');
+  });
+}
+</script>
+
+<style>
+@media print {
+  nav,
+  footer,
+  .disclaimer,
+  .card-header,
+  .btn,
+  h1,
+  div[style*="display:flex"] { display: none !important; }
+
+  .card {
+    border: none !important;
+    box-shadow: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  #print-content {
+    background: white !important;
+    color: black !important;
+    font-family: 'Times New Roman', serif !important;
+    font-size: 12pt !important;
+    line-height: 1.8 !important;
+    white-space: pre-wrap !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    width: 100% !important;
+  }
+}
+</style>
+
+{% endblock %}

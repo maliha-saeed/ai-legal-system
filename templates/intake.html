@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% block title %}New Case Intake{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+  <h1>New Client Intake</h1>
+  <p>Complete all required fields. Information will be automatically classified and screened.</p>
+</div>
+
+<form method="POST" action="{{ url_for('intake') }}">
+
+  <!-- Client Information -->
+  <div class="card">
+    <div class="card-header">👤 Client Information</div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Full Name <span class="req">*</span></label>
+        <input type="text" name="client_name" class="form-control"
+               placeholder="e.g. Jane Smith"
+               value="{{ form_data.get('client_name', '') }}" required>
+      </div>
+      <div class="form-group">
+        <label>Date of Birth</label>
+        <input type="date" name="client_dob" class="form-control"
+               value="{{ form_data.get('client_dob', '') }}">
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Email Address</label>
+        <input type="email" name="client_email" class="form-control"
+               placeholder="client@example.com"
+               value="{{ form_data.get('client_email', '') }}">
+      </div>
+      <div class="form-group">
+        <label>Phone Number</label>
+        <input type="tel" name="client_phone" class="form-control"
+               placeholder="07xxx xxxxxx"
+               value="{{ form_data.get('client_phone', '') }}">
+      </div>
+    </div>
+  </div>
+
+  <!-- Incident Details -->
+  <div class="card">
+    <div class="card-header">📅 Incident Details</div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Date of Incident <span class="req">*</span></label>
+        <input type="date" name="incident_date" class="form-control"
+               value="{{ form_data.get('incident_date', '') }}" required>
+      </div>
+      <div class="form-group">
+        <label>Incident Type <span class="req">*</span></label>
+        <select name="incident_type" class="form-control" required>
+          <option value="" {% if not form_data.get('incident_type') %}selected{% endif %}>— Select type —</option>
+          <option value="Personal Injury" {% if form_data.get('incident_type') == 'Personal Injury' %}selected{% endif %}>Personal Injury</option>
+          <option value="Clinical Negligence" {% if form_data.get('incident_type') == 'Clinical Negligence' %}selected{% endif %}>Clinical Negligence</option>
+          <option value="Housing Disrepair" {% if form_data.get('incident_type') == 'Housing Disrepair' %}selected{% endif %}>Housing Disrepair</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Location of Incident</label>
+      <input type="text" name="incident_location" class="form-control"
+             placeholder="e.g. 14 High Street, Manchester / St. Thomas' Hospital, London"
+             value="{{ form_data.get('incident_location', '') }}">
+    </div>
+
+    <div class="form-group">
+      <label>Description of Incident <span class="req">*</span>
+        <span style="font-weight:400;color:var(--muted);font-size:0.8rem">
+          — Provide as much detail as possible (aim for 30+ words)
+        </span>
+      </label>
+      <textarea name="incident_description" class="form-control" rows="6"
+                placeholder="Describe the incident in detail: what happened, how it happened, who was involved, what injuries or damage occurred, and any witnesses."
+                required>{{ form_data.get('incident_description', '') }}</textarea>
+    </div>
+  </div>
+
+  <!-- Submit -->
+  <div style="display:flex;gap:1rem;align-items:center">
+    <button type="submit" class="btn btn-primary">
+      ⚖️ Submit &amp; Analyse Case
+    </button>
+    <a href="{{ url_for('index') }}" class="btn btn-outline">Cancel</a>
+    <span style="flex:1"></span>
+    <span style="font-size:0.8rem;color:var(--muted)">
+      <span class="req">*</span> Required fields
+    </span>
+  </div>
+
+</form>
+
+{% endblock %}

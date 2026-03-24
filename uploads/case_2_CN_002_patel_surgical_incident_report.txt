@@ -1,0 +1,47 @@
+SERIOUS INCIDENT REPORT — INTERNAL DOCUMENT
+
+Organisation:     Manchester University NHS Foundation Trust
+Hospital:         Manchester Royal Infirmary
+Department:       Orthopaedic Surgery
+Date of Report:   25 March 2023
+Date of Incident: 22 March 2023
+Incident Category: Wrong Site Surgery (Never Event)
+Incident Reference: MFT/SI/2023/0147
+
+PATIENT DETAILS
+
+Patient Name:     Alan Patel
+Date of Birth:    16 April 1970
+NHS Number:       473 892 1055
+Address:          31 Didsbury Road, Withington, Manchester, M20 5WH
+
+CLINICAL BACKGROUND
+
+Mr. Alan Patel was admitted to Manchester Royal Infirmary on 22 March 2023 for elective right knee arthroscopy and partial medial meniscectomy. Pre-operative imaging (MRI right knee, 14 February 2023, reporting radiologist Dr. Helen Roe) confirmed a grade 3 medial meniscal tear to the right knee. The consent form signed by Mr. Patel on 01 March 2023 specified right knee. The consent was taken by Dr. James Whitmore, Specialist Registrar.
+
+DESCRIPTION OF INCIDENT
+
+Mr. Patel was brought to theatre at 09:15 am on 22 March 2023. The operating surgeon was Mr. Christopher Baines, Consultant Orthopaedic Surgeon. Pre-operative WHO Surgical Safety Checklist was completed by Theatre Sister Diane Moss.
+
+Mr. Baines commenced arthroscopic surgery on the LEFT knee at approximately 09:30 am. The error was identified by scrub nurse Ms. Anita Kapoor at 09:42 am, who noted a discrepancy between the operative site marked on the consent form and the limb being operated upon. Surgery was immediately halted.
+
+Mr. Baines then performed the correct procedure on the RIGHT knee, which was completed successfully at 11:05 am.
+
+IMPACT ON PATIENT
+
+Mr. Patel sustained an iatrogenic portal wound to the left knee requiring closure. He experienced significant additional pain post-operatively, extended length of stay (discharged 24 March 2023, two days post-procedure), and reported considerable psychological distress to clinical staff. He was reviewed by the hospital's patient liaison team and by Dr. Grace Turner, Liaison Psychiatrist, on 23 March 2023.
+
+ROOT CAUSE ANALYSIS — PRELIMINARY FINDINGS
+
+1. The surgical site marking procedure was not completed on the ward pre-operatively by the admitting team.
+2. The WHO checklist, while signed, did not include a verbal confirmation of operative site between the surgeon and theatre team.
+3. Mr. Baines stated he had not reviewed the consent form immediately prior to commencing surgery.
+
+DUTY OF CANDOUR
+
+A meeting was held with Mr. Patel and his wife, Mrs. Nisha Patel, on 23 March 2023. The incident was disclosed fully by Mr. Baines and Ms. Clare Downes, Clinical Director. A written apology was provided on 24 March 2023.
+
+This incident has been declared a Never Event and has been reported to NHS England and to the Care Quality Commission as required.
+
+Report Author: Ms. Clare Downes, Clinical Director, Orthopaedics
+Date: 25 March 2023
