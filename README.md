@@ -7,7 +7,6 @@ AILegal is a Flask-based web application designed to support early-stage legal w
 - Rule-based claim classification
 - Viability screening
 - Document upload and information extraction
-- Template-based draft document generation
 
 ## Technologies:
 - Python
