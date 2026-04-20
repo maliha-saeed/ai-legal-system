@@ -1,5 +1,5 @@
 """
-Database layer — SQLite with schema for cases, documents, and templates.
+Database layer — SQLite with schema for cases and documents.
 """
 
 import sqlite3
@@ -67,162 +67,10 @@ def init_db():
             extracted_keywords TEXT,
             FOREIGN KEY (case_id) REFERENCES cases(id)
         );
-
-        CREATE TABLE IF NOT EXISTS templates (
-            id          INTEGER PRIMARY KEY AUTOINCREMENT,
-            name        TEXT NOT NULL,
-            claim_type  TEXT NOT NULL,
-            content     TEXT NOT NULL
-        );
     """)
-
-    # Seed templates if empty
-    cur.execute("SELECT COUNT(*) as c FROM templates")
-    if cur.fetchone()['c'] == 0:
-        _seed_templates(cur)
 
     conn.commit()
     conn.close()
-
-
-def _seed_templates(cur):
-    templates = [
-        {
-            "name": "Personal Injury — Initial Letter of Claim",
-            "claim_type": "Personal Injury",
-            "content": """LETTER OF CLAIM — PERSONAL INJURY
-
-Date: {{GENERATED_DATE}}
-
-Our Ref: {{CASE_ID}}
-
-Dear Sir/Madam,
-
-Re: Personal Injury Claim — {{CLIENT_NAME}}
-
-We write on behalf of our client, {{CLIENT_NAME}}, date of birth {{CLIENT_DOB}}, in connection with injuries sustained on {{INCIDENT_DATE}}.
-
-CIRCUMSTANCES OF THE INCIDENT
-
-{{INCIDENT_DESCRIPTION}}
-
-Location: {{INCIDENT_LOCATION}}
-
-INJURIES SUSTAINED
-
-Our client suffered injuries as a result of the above incident. Full details of the injuries and their impact will be provided following medical assessment.
-
-LIABILITY
-
-We contend that you are liable for our client's injuries by reason of negligence and/or breach of statutory duty.
-
-LIMITATION
-
-Please note that the relevant limitation period under the Limitation Act 1980 applies to this matter.
-
-We invite you to respond within 21 days of receipt of this letter, confirming whether liability is admitted or denied.
-
-Yours faithfully,
-
-[Solicitor Name]
-[Firm Name]
-
----
-NOTE: This is a draft document generated for review purposes only. It does not constitute legal advice.
-"""
-        },
-        {
-            "name": "Clinical Negligence — Pre-Action Protocol Letter",
-            "claim_type": "Clinical Negligence",
-            "content": """PRE-ACTION PROTOCOL LETTER — CLINICAL NEGLIGENCE
-
-Date: {{GENERATED_DATE}}
-
-Our Ref: {{CASE_ID}}
-
-Dear Sir/Madam,
-
-Re: Clinical Negligence Claim — {{CLIENT_NAME}}
-
-We act on behalf of {{CLIENT_NAME}}, date of birth {{CLIENT_DOB}}.
-
-NATURE OF THE CLAIM
-
-Our client received treatment on or around {{INCIDENT_DATE}}.
-
-{{INCIDENT_DESCRIPTION}}
-
-BREACH OF DUTY
-
-We allege that the treatment provided fell below the standard expected of a reasonably competent practitioner in breach of the duty of care owed to our client.
-
-CAUSATION
-
-As a direct result of the alleged breach(es) of duty, our client has suffered loss and damage, particulars of which will be provided in due course.
-
-RECORDS REQUEST
-
-We request copies of all medical records relating to our client's treatment.
-
-Please acknowledge receipt of this letter within 14 days and confirm the identity of your insurers.
-
-Yours faithfully,
-
-[Solicitor Name]
-[Firm Name]
-
----
-NOTE: This is a draft document generated for review purposes only. It does not constitute legal advice.
-"""
-        },
-        {
-            "name": "Housing Disrepair — Letter Before Action",
-            "claim_type": "Housing Disrepair",
-            "content": """LETTER BEFORE ACTION — HOUSING DISREPAIR
-
-Date: {{GENERATED_DATE}}
-
-Our Ref: {{CASE_ID}}
-
-Dear Sir/Madam,
-
-Re: Housing Disrepair — {{CLIENT_NAME}} — {{INCIDENT_LOCATION}}
-
-We act for {{CLIENT_NAME}} who is a tenant at the above property.
-
-DISREPAIR
-
-{{INCIDENT_DESCRIPTION}}
-
-Date disrepair first reported: {{INCIDENT_DATE}}
-
-OBLIGATIONS
-
-As landlord, you are obliged pursuant to Section 11 of the Landlord and Tenant Act 1985 and/or the terms of the tenancy agreement to keep the structure and exterior of the property in repair.
-
-NOTICE
-
-Please be advised that unless the disrepair is remedied within 21 days of the date of this letter, our client will issue proceedings without further notice for:
-
-1. Damages for breach of repairing obligation
-2. An order requiring you to carry out the necessary repairs
-3. Costs
-
-Yours faithfully,
-
-[Solicitor Name]
-[Firm Name]
-
----
-NOTE: This is a draft document generated for review purposes only. It does not constitute legal advice.
-"""
-        }
-    ]
-    for t in templates:
-        cur.execute(
-            "INSERT INTO templates (name, claim_type, content) VALUES (?, ?, ?)",
-            (t['name'], t['claim_type'], t['content'])
-        )
 
 
 # ─────────────────────── CRUD helpers ───────────────────────
@@ -278,7 +126,7 @@ def get_all_cases():
 def update_case_ai(case_id: int, ai_data: dict):
     """Overwrite the AI-generated fields on an existing case (used by re-analyse)."""
     conn = get_db()
-    # Only the six AI columns are updated; client/incident data is left untouched
+    # Only the AI columns are updated; client/incident data is left untouched
     conn.execute("""
         UPDATE cases SET
             claim_type=?, claim_confidence=?, claim_keywords=?,
@@ -301,9 +149,10 @@ def save_document(case_id, filename, file_path, extracted: dict) -> int:
     # Lists from the extractor (e.g. ['John Smith', 'Dr. Lee']) are joined into
     # comma-separated strings for simple storage in a single TEXT column
     cur.execute("""
-        INSERT INTO documents (case_id, filename, file_path, extracted_text,
-            extracted_names, extracted_dates, extracted_locations, extracted_keywords)
-        VALUES (?,?,?,?,?,?,?,?)
+        INSERT INTO documents (
+            case_id, filename, file_path, extracted_text,
+            extracted_names, extracted_dates, extracted_locations, extracted_keywords
+        ) VALUES (?,?,?,?,?,?,?,?)
     """, (
         case_id, filename, file_path,
         extracted.get('raw_text', ''),
@@ -326,23 +175,5 @@ def get_case_documents(case_id: int):
         "SELECT * FROM documents WHERE case_id=? ORDER BY uploaded_at DESC",
         (case_id,)
     ).fetchall()
-    conn.close()
-    return [dict(r) for r in rows]
-
-
-def get_templates(claim_type: str = None):
-    """
-    Fetch document templates from the database.
-    If claim_type is provided, return only templates for that category.
-    If omitted, return all templates (used on the /templates page).
-    """
-    conn = get_db()
-    if claim_type:
-        # Filter to matching templates, e.g. only 'Personal Injury' templates
-        rows = conn.execute(
-            "SELECT * FROM templates WHERE claim_type=?", (claim_type,)
-        ).fetchall()
-    else:
-        rows = conn.execute("SELECT * FROM templates").fetchall()
     conn.close()
     return [dict(r) for r in rows]

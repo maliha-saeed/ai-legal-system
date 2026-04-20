@@ -3,13 +3,17 @@ Flask Routes — all endpoints for the legal intake system.
 """
 
 import os
-from flask import (Blueprint, render_template, request, redirect,
-                   url_for, flash, jsonify, send_from_directory)
+from flask import render_template, request, redirect, url_for, flash, jsonify
 from werkzeug.utils import secure_filename
-from database import (create_case, get_case, get_all_cases, update_case_ai,
-                      save_document, get_case_documents, get_templates)
-from ai.logic import (classify_claim, screen_viability,
-                      extract_information, populate_template)
+from database import (
+    create_case,
+    get_case,
+    get_all_cases,
+    update_case_ai,
+    save_document,
+    get_case_documents,
+)
+from ai.logic import classify_claim, screen_viability, extract_information
 
 # Only these file extensions are accepted on upload
 ALLOWED_EXTENSIONS = {'txt', 'pdf', 'doc', 'docx'}
@@ -27,7 +31,7 @@ def register_routes(app):
     # ─── Dashboard ─────────────────────────────────────────────
     @app.route('/')
     def index():
-        cases = get_all_cases()          # Fetch all cases from the database
+        cases = get_all_cases()  # Fetch all cases from the database
         return render_template('index.html', cases=cases)
 
     # ─── Intake Form ────────────────────────────────────────────
@@ -80,7 +84,7 @@ def register_routes(app):
                 'limitation_ok': viability['limitation_ok'],
             })
 
-            case_id = create_case(case_data)           # Save to database, get new ID
+            case_id = create_case(case_data)  # Save to database, get new ID
             flash('Case submitted successfully.', 'success')
             return redirect(url_for('case_detail', case_id=case_id))  # Go to new case page
 
@@ -96,10 +100,8 @@ def register_routes(app):
             flash('Case not found.', 'error')
             return redirect(url_for('index'))
 
-        documents = get_case_documents(case_id)            # All uploads for this case
-        templates = get_templates(case.get('claim_type'))  # Only templates matching claim type
-        return render_template('case_detail.html',
-                               case=case, documents=documents, templates=templates)
+        documents = get_case_documents(case_id)  # All uploads for this case
+        return render_template('case_detail.html', case=case, documents=documents)
 
     # ─── Document Upload ─────────────────────────────────────────
     @app.route('/case/<int:case_id>/upload', methods=['POST'])
@@ -122,7 +124,7 @@ def register_routes(app):
             return redirect(url_for('case_detail', case_id=case_id))
 
         if not allowed_file(file.filename):
-            flash('Invalid file type. Please upload a .txt, .pdf, or .doc file.', 'error')
+            flash('Invalid file type. Please upload a .txt, .pdf, .doc, or .docx file.', 'error')
             return redirect(url_for('case_detail', case_id=case_id))
 
         # secure_filename strips dangerous characters (e.g. path traversal like ../../)
@@ -145,34 +147,15 @@ def register_routes(app):
         # Run NLP extraction if text was found; otherwise store a placeholder message
         extracted = extract_information(raw_text) if raw_text else {
             "raw_text": f"[Binary file: {ext.upper()}. Text extraction not available in demo.]",
-            "names": [], "dates": [], "locations": [], "keywords": []
+            "names": [],
+            "dates": [],
+            "locations": [],
+            "keywords": []
         }
 
         save_document(case_id, file.filename, file_path, extracted)
         flash('Document uploaded and processed.', 'success')
         return redirect(url_for('case_detail', case_id=case_id))
-
-    # ─── Template Generator ──────────────────────────────────────
-    @app.route('/case/<int:case_id>/generate/<int:template_id>')
-    def generate_document(case_id, template_id):
-        from database import get_db  # Local import avoids circular dependency at module level
-        case = get_case(case_id)
-        if not case:
-            flash('Case not found.', 'error')
-            return redirect(url_for('index'))
-
-        # Fetch the requested template directly by ID
-        conn = get_db()
-        tmpl = conn.execute("SELECT * FROM templates WHERE id=?", (template_id,)).fetchone()
-        conn.close()
-        if not tmpl:
-            flash('Template not found.', 'error')
-            return redirect(url_for('case_detail', case_id=case_id))
-
-        # Replace {{PLACEHOLDERS}} in template content with actual case data
-        populated = populate_template(tmpl['content'], case)
-        return render_template('generated_doc.html',
-                               case=case, template=dict(tmpl), content=populated)
 
     # ─── API: Re-run AI on existing case ────────────────────────
     @app.route('/api/case/<int:case_id>/reanalyse', methods=['POST'])
@@ -194,11 +177,6 @@ def register_routes(app):
             'viability_explanation': viability['viability_explanation'],
             'limitation_ok': viability['limitation_ok'],
         })
+
         flash('Case re-analysed successfully.', 'success')
         return redirect(url_for('case_detail', case_id=case_id))
-
-    # ─── Templates list ──────────────────────────────────────────
-    @app.route('/templates')
-    def templates_list():
-        all_templates = get_templates()  # No filter — fetch all templates
-        return render_template('templates.html', templates=all_templates)

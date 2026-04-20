@@ -9,7 +9,7 @@ import sys
 import os
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from ai.logic import classify_claim, screen_viability, extract_information, populate_template
+from ai.logic import classify_claim, screen_viability, extract_information
 
 
 # ─────────────────────────────────────────────────────────────────
@@ -134,32 +134,11 @@ def test_UT10_name_extraction_titled():
 
 
 # ─────────────────────────────────────────────────────────────────
-# TEMPLATE POPULATION TESTS
-# ─────────────────────────────────────────────────────────────────
-
-def test_UT11_template_population():
-    """UT-11: Template placeholder replaced with actual case data."""
-    template_content = "Dear {{CLIENT_NAME}}, your case {{CASE_ID}} has been reviewed."
-    case_data = {
-        "id": 1,
-        "client_name": "Jane Smith",
-        "client_dob": "1990-01-01",
-        "incident_date": "2024-03-15",
-        "incident_description": "Test description.",
-        "incident_location": "London",
-        "claim_type": "Personal Injury",
-    }
-    result = populate_template(template_content, case_data)
-    assert "Jane Smith" in result
-    assert "{{CLIENT_NAME}}" not in result  # placeholder must be gone
-
-
-# ─────────────────────────────────────────────────────────────────
 # EDGE CASE TESTS
 # ─────────────────────────────────────────────────────────────────
 
-def test_UT12_invalid_date_format():
-    """UT-12: Invalid incident date — limitation check should add an issue."""
+def test_UT11_invalid_date_format():
+    """UT-11: Invalid incident date — limitation check should add an issue."""
     case_data = {
         "client_name": "Test User",
         "incident_date": "not-a-date",   # invalid
@@ -187,14 +166,13 @@ if __name__ == '__main__':
         ("UT-08 Short description warning",                    test_UT08_short_description_warning),
         ("UT-09 Date extraction — UK format",                  test_UT09_date_extraction_uk_format),
         ("UT-10 Name extraction — titled",                     test_UT10_name_extraction_titled),
-        ("UT-11 Template population",                          test_UT11_template_population),
-        ("UT-12 Invalid date format",                          test_UT12_invalid_date_format),
+        ("UT-11 Invalid date format",                          test_UT11_invalid_date_format),
     ]
 
     passed = 0
     failed = 0
 
-    print("\nRunning 12 unit tests...\n")
+    print("\nRunning 11 unit tests...\n")
     print(f"  {'Status':<6}  Test")
     print(f"  {'──────':<6}  {'─' * 45}")
 

@@ -98,14 +98,16 @@
         {% endif %}
       </div>
 
-      <div style="margin-bottom:0.75rem">
-        <div class="di-label" style="font-size:0.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:.25rem">
-          Confidence — {{ (case.claim_confidence * 100) | int if case.claim_confidence else 0 }}%
-        </div>
-        <div class="conf-bar">
-          <div class="conf-fill" style="width:{{ (case.claim_confidence * 100) | int if case.claim_confidence else 0 }}%"></div>
-        </div>
-      </div>
+{% set confidence_pct = (case.claim_confidence * 100) | int if case.claim_confidence else 0 %}
+
+<div style="margin-bottom:0.75rem">
+  <div class="di-label" style="font-size:0.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:.25rem">
+    Confidence — {{ confidence_pct }}%
+  </div>
+  <div class="conf-bar" style="--conf-width: {{ confidence_pct }}%;">
+    <div class="conf-fill" style="width: var(--conf-width);"></div>
+  </div>
+</div>
 
       <div>
         <div class="di-label" style="font-size:0.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:.25rem">Matched Keywords</div>
@@ -183,28 +185,5 @@
     <p style="color:var(--muted);font-size:0.88rem;text-align:center;padding:1.5rem 0">No documents uploaded yet.</p>
   {% endif %}
 </div>
-
-<!-- Template Generator -->
-{% if templates %}
-<div class="card">
-  <div class="card-header">📝 Document Templates</div>
-  <p style="font-size:0.88rem;color:var(--muted);margin-bottom:1rem">
-    Generate a draft document pre-filled with this case's data.
-    All documents must be reviewed and edited by a solicitor before use.
-  </p>
-  <div style="display:flex;flex-direction:column;gap:0.6rem">
-    {% for tmpl in templates %}
-    <div style="display:flex;align-items:center;justify-content:space-between;padding:0.75rem 1rem;border:1px solid var(--border);border-radius:var(--radius);background:#fafaf8">
-      <div>
-        <strong style="font-size:0.9rem">{{ tmpl.name }}</strong>
-        <div style="font-size:0.78rem;color:var(--muted)">{{ tmpl.claim_type }}</div>
-      </div>
-      <a href="{{ url_for('generate_document', case_id=case.id, template_id=tmpl.id) }}"
-         class="btn btn-gold btn-sm">Generate Draft →</a>
-    </div>
-    {% endfor %}
-  </div>
-</div>
-{% endif %}
 
 {% endblock %}

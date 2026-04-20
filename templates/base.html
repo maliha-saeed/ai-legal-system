@@ -363,7 +363,6 @@
   <a href="{{ url_for('index') }}" class="nav-brand">AI<span>Legal</span></a>
   <a href="{{ url_for('index') }}" {% if request.endpoint == 'index' %}class="active"{% endif %}>Dashboard</a>
   <a href="{{ url_for('intake') }}" {% if request.endpoint == 'intake' %}class="active"{% endif %}>New Case</a>
-  <a href="{{ url_for('templates_list') }}" {% if request.endpoint == 'templates_list' %}class="active"{% endif %}>Templates</a>
   <div class="nav-spacer"></div>
   <a href="{{ url_for('intake') }}" class="nav-cta">+ New Case</a>
 </nav>
@@ -383,7 +382,7 @@
 </main>
 
 <footer>
-  AI Legal - <strong>AI Assisted Legal Automation System.</strong>
+  AI Legal - <strong>AI Assisted Legal System.</strong>
 </footer>
 
 </body>

@@ -39,8 +39,8 @@ def get_test_client():
     with app.app_context():
         init_db()
 
-        # Seed one case and ensure templates exist (init_db seeds them)
-        case_id = create_case({
+        # Seed one case
+        create_case({
             'client_name':          'Jane Smith',
             'client_email':         'jane@example.com',
             'client_phone':         '07700000000',
@@ -217,34 +217,6 @@ def test_IT08_upload_invalid_extension():
         cleanup(db_fd, db_path, db, orig)
 
 
-def test_IT09_generate_document():
-    """IT-09: GET /case/1/generate/1 — returns 200 with populated document."""
-    client, app, db_fd, db_path, orig, db = get_test_client()
-    try:
-        with app.app_context():
-            response = client.get('/case/1/generate/1')
-        assert response.status_code == 200
-        # Generated doc should contain the client's name from the seeded case
-        assert b'Jane Smith' in response.data
-    finally:
-        cleanup(db_fd, db_path, db, orig)
-
-
-def test_IT10_get_templates_list():
-    """IT-10: GET /templates — returns 200 and lists all 3 templates."""
-    client, app, db_fd, db_path, orig, db = get_test_client()
-    try:
-        with app.app_context():
-            response = client.get('/templates')
-        assert response.status_code == 200
-        # All three claim types should appear
-        assert b'Personal Injury'    in response.data
-        assert b'Clinical Negligence' in response.data
-        assert b'Housing Disrepair'  in response.data
-    finally:
-        cleanup(db_fd, db_path, db, orig)
-
-
 # ─────────────────────────────────────────────────────────────────
 # STANDALONE RUNNER
 # ─────────────────────────────────────────────────────────────────
@@ -255,18 +227,16 @@ if __name__ == '__main__':
         ("IT-02 GET /intake               — form renders",             test_IT02_get_intake_form),
         ("IT-03 POST /intake valid        — redirects to /case/<id>",  test_IT03_post_intake_valid),
         ("IT-04 POST /intake missing name — error shown",              test_IT04_post_intake_missing_name),
-        ("IT-05 GET /case/1              — case data displayed",       test_IT05_get_case_exists),
-        ("IT-06 GET /case/9999           — case not found redirect",   test_IT06_get_case_not_found),
-        ("IT-07 POST upload .txt         — redirects, stored",         test_IT07_upload_txt_file),
-        ("IT-08 POST upload .exe         — rejected with error",       test_IT08_upload_invalid_extension),
-        ("IT-09 GET /case/1/generate/1  — document rendered",         test_IT09_generate_document),
-        ("IT-10 GET /templates           — all 3 templates listed",    test_IT10_get_templates_list),
+        ("IT-05 GET /case/1               — case data displayed",      test_IT05_get_case_exists),
+        ("IT-06 GET /case/9999            — case not found redirect",  test_IT06_get_case_not_found),
+        ("IT-07 POST upload .txt          — redirects, stored",        test_IT07_upload_txt_file),
+        ("IT-08 POST upload .exe          — rejected with error",      test_IT08_upload_invalid_extension),
     ]
 
     passed = 0
     failed = 0
 
-    print("\nRunning 10 route integration tests...\n")
+    print("\nRunning 8 route integration tests...\n")
     print(f"  {'Status':<6}  Test")
     print(f"  {'──────':<6}  {'─' * 55}")
 
