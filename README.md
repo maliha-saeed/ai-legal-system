@@ -18,5 +18,5 @@ AILegal is a Flask-based web application designed to support early-stage legal w
 ## How to Run:
 1. Create a virtual environment
 2. Install requirements
-3. Run `python3 app.py`
+3. Run `python app.py`
 4. Open `http://127.0.0.1:5000`
